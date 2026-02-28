@@ -32,7 +32,7 @@
                     <li><a href="/about">About Us</a></li>
                     <li><a href="/contact">Contact</a></li>
                     <li id="nav-dashboard-link" style="display: none;"><a href="/dashboard">Dashboard</a></li>
-                    <li id="nav-logout-link" style="display: none;"><a href="#" id="logout-btn">Sign Out</a></li>
+                    <li id="nav-logout-link" style="display: none;"><a href="#" id="my-account-btn">My Account</a></li>
                 </ul>
             </div>
         </nav>
@@ -45,7 +45,7 @@
         <!-- Footer -->
         <footer>
             <div class="footer-content">
-                <p>&copy; 2026 Ethereum AI Validation. Educational Simulation Only.</p>
+                <p>&copy; 2024 Ethereum AI Validator. All rights reserved.</p>
             </div>
         </footer>
     </div> <!-- End App Wrapper -->
@@ -64,6 +64,34 @@
             <p id="auth-error"
                 style="color: #ef4444; font-size: 0.85rem; margin-top: 1rem; display: none; font-weight: 600;">ACCESS
                 DENIED</p>
+        </div>
+    </div>
+
+    <!-- My Account Modal Overlay -->
+    <div id="account-modal-overlay" class="auth-overlay" style="display: none;">
+        <div class="auth-box glass-panel"
+            style="max-width: 400px; width: 90%; text-align: center; border-color: var(--primary-blue);">
+            <h2 class="text-gradient" style="margin-bottom: 1.5rem;">My Account</h2>
+
+            <div
+                style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: left;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Email Address:</p>
+                <p id="modal-account-email" style="font-weight: 600; word-break: break-all;">-</p>
+
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem; margin-top: 1rem;">
+                    Current Balance:</p>
+                <p id="modal-account-balance"
+                    style="font-weight: 800; color: var(--primary-green); font-size: 1.25rem; font-variant-numeric: tabular-nums;">
+                    0.00000000 ETH</p>
+
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem; margin-top: 1rem;">
+                    Detected Device:</p>
+                <p id="modal-account-device" style="font-weight: 600; color: #f8fafc; font-size: 0.9rem;">-</p>
+            </div>
+
+            <button id="modal-close-btn" class="btn-secondary" style="width: 100%; margin-bottom: 1rem;">Close</button>
+            <button id="modal-logout-btn" class="btn-secondary"
+                style="width: 100%; border-color: #ef4444; color: #ef4444;">Sign Out</button>
         </div>
     </div>
 

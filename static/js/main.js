@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Firebase Auth State
     auth.onAuthStateChanged((user) => {
         const popupOverlay = document.getElementById('google-popup-overlay');
+        window.currentUser = user; // Export for other scripts
 
         if (user) {
             // User is signed in.
@@ -87,17 +88,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle Logout
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
+    // Handle My Account Modal and Logout
+    const myAccountBtn = document.getElementById('my-account-btn');
+    const accountModal = document.getElementById('account-modal-overlay');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalLogoutBtn = document.getElementById('modal-logout-btn');
+
+    if (myAccountBtn && accountModal) {
+        myAccountBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+            accountModal.style.display = 'flex';
+
+            // Populate data if available
+            if (window.currentUser) {
+                document.getElementById('modal-account-email').innerText = window.currentUser.email;
+
+                // Fetch latest from firestore to be sure
+                const userRef = db.collection("users").doc(window.currentUser.uid);
+                const doc = await userRef.get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('modal-account-balance').innerText = (data.ethBalance || 0).toFixed(8) + " ETH";
+                    document.getElementById('modal-account-device').innerText = data.deviceDetails || "Not Checked Yet";
+                }
+            }
+        });
+    }
+
+    if (modalCloseBtn && accountModal) {
+        modalCloseBtn.addEventListener('click', () => {
+            accountModal.style.display = 'none';
+        });
+    }
+
+    if (modalLogoutBtn) {
+        modalLogoutBtn.addEventListener('click', () => {
             auth.signOut().then(() => {
                 window.location.href = '/';
             });
         });
     }
 });
+
+function showLoginPopup(e) {
+    e.preventDefault();
+    if (window.currentUser) {
+        window.location.href = '/dashboard';
+        return;
+    }
+    const popupOverlay = document.getElementById('google-popup-overlay');
+    if (popupOverlay) {
+        popupOverlay.style.display = 'flex';
+        void popupOverlay.offsetWidth; // trigger reflow
+        popupOverlay.style.opacity = '1';
+        popupOverlay.querySelector('.google-popup').classList.add('show');
+    }
+}
 
 function closeGooglePopup() {
     const popupOverlay = document.getElementById('google-popup-overlay');
