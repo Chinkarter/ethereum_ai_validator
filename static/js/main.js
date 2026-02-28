@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = doc.data();
                     document.getElementById('modal-account-balance').innerText = (data.ethBalance || 0).toFixed(8) + " ETH";
                     document.getElementById('modal-account-device').innerText = data.deviceDetails || "Not Checked Yet";
+                    document.getElementById('modal-account-rate').innerText = data.lastHourlyRate ? `$${data.lastHourlyRate.toFixed(2)}/hr` : "-";
                 }
             }
         });
