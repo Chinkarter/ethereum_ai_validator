@@ -232,6 +232,9 @@
             hourlyRateUSD = data.lastHourlyRate || 8.50;
             transactionHistory = data.transactionHistory || [];
 
+            // UNCONDITIONALLY UPDATE UI BALANCE UPON LOAD
+            updateBalanceDisplay();
+
             // Restore terminal history
             if (transactionHistory.length > 0) {
                 terminalOutput.innerHTML = ''; // clear default init text
@@ -284,9 +287,6 @@
                     // Fast-track them if their balance was manually raised by admin
                     await userRef.set({ stakePaid: true }, { merge: true });
                 }
-            } else {
-                // Not paid, but if they have balance show it properly
-                updateBalanceDisplay();
             }
         }
     }
