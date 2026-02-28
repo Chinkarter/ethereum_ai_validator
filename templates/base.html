@@ -19,6 +19,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Prevent login screen flicker on refresh for authenticated sessions
+        if (sessionStorage.getItem('siteAuth') === 'true') {
+            document.write('<style>#global-auth-overlay { display: none !important; } #app-wrapper { filter: none !important; transition: none !important; }</style>');
+        }
+    </script>
 </head>
 
 <body>
