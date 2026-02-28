@@ -39,9 +39,11 @@ body::before {
     right: 0;
     bottom: 0;
     z-index: -2;
+    background-color: var(--bg-darker);
     background-size: cover;
     background-position: center;
-    animation: bgSlideshow 30s infinite alternate;
+    background-repeat: no-repeat;
+    animation: bgSlideshow 30s infinite;
 }
 
 body::after {
@@ -65,23 +67,33 @@ body::after {
         transform: scale(1.0);
     }
 
-    45% {
+    30% {
         background-image: url('../img/bg1.png');
         transform: scale(1.05);
     }
 
-    50% {
+    33% {
         background-image: url('../img/bg2.png');
         transform: scale(1.0);
     }
 
-    95% {
+    63% {
         background-image: url('../img/bg2.png');
         transform: scale(1.05);
     }
 
-    100% {
+    66% {
         background-image: url('../img/bg3.png');
+        transform: scale(1.0);
+    }
+
+    97% {
+        background-image: url('../img/bg3.png');
+        transform: scale(1.05);
+    }
+
+    100% {
+        background-image: url('../img/bg1.png');
         transform: scale(1.0);
     }
 }
