@@ -6,7 +6,28 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from utils.gemini_helper import evaluate_device_power, generate_validation_log
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Ethereum AI Validator")
+
+# Security Middleware Config
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    # Anti-Hacking & Max Security Headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
