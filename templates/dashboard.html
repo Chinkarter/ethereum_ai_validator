@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Ethereum AI Validator{% endblock %}
+
+{% block content %}
+<div class="dashboard-container animate-fade-in" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+
+    <!-- Main Panel -->
+    <div class="main-panel">
+        <div class="glass-panel" style="margin-bottom: 2rem;">
+            <h1 class="text-gradient">Validator Dashboard</h1>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Analyze your device and start training AI models
+                for Ethereum validation.</p>
+
+            <!-- Step 1: Device Check -->
+            <div id="device-check-section"
+                style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--glass-border);">
+                <h3 style="margin-bottom: 1rem;">Device Analysis</h3>
+                <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                    Our system is intelligent enough to analyze your device's computing power and determine your earning
+                    rate depending on current ETH blockchain conditions.
+                </p>
+                <button id="check-device-btn" class="btn-primary">Check My Device Power</button>
+
+                <div id="device-result"
+                    style="display: none; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+                    <!-- Results populated by JS -->
+                </div>
+            </div>
+
+            <!-- Step 2: Pay Stake -->
+            <div id="stake-section"
+                style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--glass-border); display: none;">
+                <h3 style="margin-bottom: 1rem;">Initialize Stake ($50)</h3>
+                <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                    To begin training your allocated workloads on our network, a minimum $50 USDT equivalent stake must
+                    be deposited to the Ethereum staking contract via Binance.
+                </p>
+                <!-- Opens Binance in new tab as requested -->
+                <a href="https://www.binance.com/" target="_blank" class="btn-secondary"
+                    style="margin-bottom: 1rem; display: block; text-align: center;">Pay Stake via Binance</a>
+
+                <button id="confirm-payment-btn" class="btn-primary"
+                    style="width: 100%; background: linear-gradient(135deg, #f59e0b, #ea580c);">I have paid 50
+                    USDT</button>
+                <p style="color: #ef4444; font-size: 0.8rem; text-align: center; margin-top: 0.5rem; font-weight: 600;">
+                    Warning: False claims of payment will lead to an immediate permanent ban.</p>
+            </div>
+
+            <!-- Wait for Payment Confirmation -->
+            <div id="confirmation-countdown"
+                style="display: none; background: rgba(0,0,0,0.2); padding: 2rem; border-radius: 8px; text-align: center; border: 1px solid var(--primary-blue);">
+                <h3 class="text-gradient" style="margin-bottom: 1rem;">Confirming on Blockchain...</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">Estimated time until confirmation:</p>
+                <div id="countdown-timer"
+                    style="font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums;">10:00</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Sidebar / Earnings Panel -->
+    <div class="sidebar">
+        <div class="glass-panel" style="position: sticky; top: 100px;">
+            <h3 style="margin-bottom: 1.5rem; text-align: center;">Your Balance</h3>
+
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary-green); font-variant-numeric: tabular-nums;"
+                    id="eth-balance">0.00000000</div>
+                <div style="color: var(--text-muted); font-weight: 600;">ETH</div>
+                <div style="margin-top: 0.5rem; font-size: 1.2rem; color: #f8fafc;" id="usdt-balance">≈ $0.00 USDT</div>
+            </div>
+
+            <button id="start-training-btn" class="btn-primary" style="width: 100%; display: none;" disabled>Start
+                Training AI Models</button>
+            <div id="training-status"
+                style="margin-top: 1rem; text-align: center; font-size: 0.9rem; color: var(--primary-green); display: none;">
+                🟢 Training Active - Do not switch off device
+            </div>
+
+            <div
+                style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); text-align: center;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Next Withdrawal Period:
+                </p>
+                <p style="font-weight: 600;" id="next-withdrawal">-</p>
+                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Withdrawals processed on
+                    1st & 15th of the month. Min $50 USDT stake must remain.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Device Tier Table Modal (Hidden by default) -->
+<div id="tier-table-wrapper" style="margin-top: 2rem; display: none;">
+    <div class="glass-panel">
+        <h3 style="margin-bottom: 1rem;">Device AI Training Tiers</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--primary-blue);">
+                    <th style="padding: 1rem 0; color: var(--primary-blue);">Device Category</th>
+                    <th style="padding: 1rem 0; color: var(--primary-blue);">Earning Potential (USDT/hr)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 1rem 0;">Low Power (Mobile Phones)</td>
+                    <td style="padding: 1rem 0;">~$2.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 1rem 0;">Medium Power (Standard Laptops)</td>
+                    <td style="padding: 1rem 0;">~$10.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 1rem 0;">High Power (Desktops/MacBooks)</td>
+                    <td style="padding: 1rem 0;">~$20.00</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem 0;">Ultra Power (Gaming PC / Workstation)</td>
+                    <td style="padding: 1rem 0;">~$40.00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Constants for simulation
+    const ETH_PRICE = 3500; // Simulated ETH price in USD
+
+    // Elements
+    const checkDeviceBtn = document.getElementById('check-device-btn');
+    const deviceResult = document.getElementById('device-result');
+    const stakeSection = document.getElementById('stake-section');
+    const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
+    const confirmCountdown = document.getElementById('confirmation-countdown');
+    const timerDisplay = document.getElementById('countdown-timer');
+    const startTrainingBtn = document.getElementById('start-training-btn');
+    const trainingStatus = document.getElementById('training-status');
+    const ethBalanceDisplay = document.getElementById('eth-balance');
+    const usdtBalanceDisplay = document.getElementById('usdt-balance');
+    const nextWithdrawalDisplay = document.getElementById('next-withdrawal');
+    const deviceCheckSection = document.getElementById('device-check-section');
+    const tierTable = document.getElementById('tier-table-wrapper');
+
+    let hourlyRateUSD = 0;
+    let ethBalance = 0;
+    let trainingInterval;
+
+    // Set Next Withdrawal Date
+    function setNextWithdrawal() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const d1 = new Date(year, month, 1);
+        const d15 = new Date(year, month, 15);
+        const nextMonth1 = new Date(year, month + 1, 1);
+
+        let nextD;
+        if (now < d1) nextD = d1;
+        else if (now < d15) nextD = d15;
+        else nextD = nextMonth1;
+
+        nextWithdrawalDisplay.innerText = nextD.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    setNextWithdrawal();
+
+    // Step 1: Check Device
+    checkDeviceBtn.addEventListener('click', async () => {
+        checkDeviceBtn.innerHTML = "Analyzing Device capabilities...";
+        checkDeviceBtn.disabled = true;
+
+        // Gather device info via JS
+        const deviceInfo = {
+            userAgent: navigator.userAgent,
+            cores: navigator.hardwareConcurrency || "Unknown",
+            memory: navigator.deviceMemory || "Unknown"
+        };
+
+        try {
+            // Call our FastAPI backend which will call Gemini
+            const response = await fetch('/api/detect-device', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(deviceInfo)
+            });
+            const data = await response.json();
+
+            hourlyRateUSD = data.hourly_rate;
+
+            deviceResult.innerHTML = `
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary-green); padding: 1rem; border-radius: 6px;">
+                    <h4 style="color: var(--primary-green); margin-bottom: 0.5rem;">Device Detected!</h4>
+                    <p style="font-size: 0.9rem; margin-bottom: 0.5rem;"><strong>Specs:</strong> ${data.device_assessment}</p>
+                    <p style="font-size: 1.1rem; color: #f8fafc;"><strong>Allocated Rate:</strong> $${data.hourly_rate}/hour</p>
+                </div>
+            `;
+            deviceResult.style.display = 'block';
+            tierTable.style.display = 'block';
+
+            checkDeviceBtn.style.display = 'none';
+            stakeSection.style.display = 'block';
+
+        } catch (err) {
+            checkDeviceBtn.innerHTML = "Error analyzing. Try again.";
+            checkDeviceBtn.disabled = false;
+        }
+    });
+
+    // Step 2: Confirm Payment & Countdown
+    confirmPaymentBtn.addEventListener('click', () => {
+        stakeSection.style.display = 'none';
+        deviceCheckSection.style.display = 'none';
+        confirmCountdown.style.display = 'block';
+
+        // Add 50 USD stake to balance immediately for UX feedback
+        ethBalance = 50 / ETH_PRICE;
+        updateBalanceDisplay();
+
+        // 10 minute countdown simulation (accelerated for testing if needed, keeping 10m here)
+        let timeRemaining = 600; // 10 minutes in seconds
+
+        const countdownInterval = setInterval(() => {
+            timeRemaining--;
+            const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+            const s = (timeRemaining % 60).toString().padStart(2, '0');
+            timerDisplay.innerText = `${m}:${s}`;
+
+            if (timeRemaining <= 0) {
+                clearInterval(countdownInterval);
+                finishPaymentConfirmation();
+            }
+        }, 1000);
+    });
+
+    function finishPaymentConfirmation() {
+        confirmCountdown.style.display = 'none';
+        startTrainingBtn.style.display = 'block';
+        startTrainingBtn.disabled = false;
+        startTrainingBtn.classList.add('animate-fade-in');
+    }
+
+    // Update Display format
+    function updateBalanceDisplay() {
+        ethBalanceDisplay.innerText = ethBalance.toFixed(8);
+        const usdtEquivalent = ethBalance * ETH_PRICE;
+        usdtBalanceDisplay.innerText = `≈ $${usdtEquivalent.toFixed(2)} USDT`;
+    }
+
+    // Step 3: Start Training Ticker
+    startTrainingBtn.addEventListener('click', () => {
+        startTrainingBtn.style.display = 'none';
+        trainingStatus.style.display = 'block';
+
+        // Calculate rate per 4 seconds based on hourly rate
+        // hourlyRateUSD / 3600 = USD per second. * 4 = USD per 4 seconds.
+        const usdPerFourSeconds = (hourlyRateUSD / 3600) * 4;
+        const ethPerFourSeconds = usdPerFourSeconds / ETH_PRICE;
+
+        // Run ticker every 4 seconds
+        trainingInterval = setInterval(() => {
+            // Add a tiny bit of randomness to make it look realistic (±10%)
+            const multiplier = 0.9 + (Math.random() * 0.2);
+            ethBalance += (ethPerFourSeconds * multiplier);
+            updateBalanceDisplay();
+        }, 4000);
+    });
+
+</script>
+{% endblock %}

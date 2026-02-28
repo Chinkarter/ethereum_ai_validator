@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Contact - Ethereum AI Validator{% endblock %}
+
+{% block content %}
+<div class="glass-panel animate-fade-in" style="max-width: 600px; margin: 0 auto;">
+    <h1 class="text-gradient" style="margin-bottom: 1rem; text-align: center;">Get in Touch</h1>
+    <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Have questions about the simulation?
+        Reach out to us.</p>
+
+    <form style="display: flex; flex-direction: column; gap: 1.5rem;"
+        onsubmit="event.preventDefault(); alert('Message sent successfully!');">
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Name</label>
+            <input type="text" required
+                style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white; outline: none;">
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+            <input type="email" required
+                style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white; outline: none;">
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Message</label>
+            <textarea rows="5" required
+                style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white; outline: none; resize: vertical;"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Send Message</button>
+    </form>
+</div>
+{% endblock %}
