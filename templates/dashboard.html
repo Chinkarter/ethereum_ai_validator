@@ -99,6 +99,9 @@
                 <p style="font-weight: 600;" id="next-withdrawal">-</p>
                 <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Withdrawals processed on
                     1st & 15th of the month. Min $100 USDT stake must remain.</p>
+                <p style="color: #60a5fa; font-size: 0.75rem; margin-top: 0.5rem;">Note: You can request an emergency
+                    full stake withdrawal of your $100 USDT at any time through the <a href="/contact"
+                        style="color: #60a5fa; text-decoration: underline;">Contact Us</a> page.</p>
                 <button id="withdraw-btn" class="btn-primary"
                     style="width: 100%; margin-top: 1rem; font-size: 0.9rem; padding: 0.6rem;">Initiate
                     Withdrawal</button>
@@ -172,6 +175,7 @@
     let hourlyRateUSD = 8.50; // default medium
     let isTraining = false;
     let mainLoopInterval;
+    let transactionHistory = [];
 
     // Format timer
     function formatTime(sec) {
@@ -226,6 +230,22 @@
             ethBalance = data.ethBalance || 0;
             trainingTimeSeconds = data.trainingTimeSeconds || 0;
             hourlyRateUSD = data.lastHourlyRate || 8.50;
+            transactionHistory = data.transactionHistory || [];
+
+            // Restore terminal history
+            if (transactionHistory.length > 0) {
+                terminalOutput.innerHTML = ''; // clear default init text
+                transactionHistory.forEach(log => {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+                    if (log.includes("REJECTED") || log.includes("paused")) {
+                        line.style.color = '#ef4444';
+                    }
+                    line.innerText = log;
+                    terminalOutput.appendChild(line);
+                });
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
 
             // Auto-Check Device on refresh/login if they have a history
             const deviceInfo = {
@@ -261,9 +281,12 @@
                 startTrainingBtn.innerText = "Continue Validating";
 
                 if (!data.stakePaid) {
-                    // Fast-track them if their balance was manually raised by admin 
+                    // Fast-track them if their balance was manually raised by admin
                     await userRef.set({ stakePaid: true }, { merge: true });
                 }
+            } else {
+                // Not paid, but if they have balance show it properly
+                updateBalanceDisplay();
             }
         }
     }
@@ -283,11 +306,18 @@
 
     async function saveUserData() {
         if (!currentUser) return;
+
+        // Keep history array manageable (last 50 logs max to avoid massive docs)
+        if (transactionHistory.length > 50) {
+            transactionHistory = transactionHistory.slice(transactionHistory.length - 50);
+        }
+
         const userRef = db.collection("users").doc(currentUser.uid);
         await userRef.set({
             ethBalance: ethBalance,
             trainingTimeSeconds: trainingTimeSeconds,
-            lastHourlyRate: hourlyRateUSD
+            lastHourlyRate: hourlyRateUSD,
+            transactionHistory: transactionHistory
         }, { merge: true });
     }
 
@@ -383,10 +413,13 @@
             const res = await fetch('/api/generate-validation-log');
             const data = await res.json();
 
+            const text = `[${formatTime(trainingTimeSeconds)}] ` + data.log;
             const line = document.createElement('div');
             line.className = 'terminal-line';
-            line.innerText = `[${formatTime(trainingTimeSeconds)}] ` + data.log;
+            line.innerText = text;
             terminalOutput.appendChild(line);
+
+            transactionHistory.push(text);
 
             // auto scroll
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
@@ -423,12 +456,15 @@
                 if (ethBalance < 0) ethBalance = 0;
 
                 if (trainingTimeSeconds % 3 === 0) {
+                    const text = `[${formatTime(trainingTimeSeconds)}] TRANSACTION REJECTED. Validation failed. Penalty applied.`;
                     const line = document.createElement('div');
                     line.className = 'terminal-line';
                     line.style.color = '#ef4444'; // Red error font
-                    line.innerText = `[${formatTime(trainingTimeSeconds)}] TRANSACTION REJECTED. Validation failed. Penalty applied.`;
+                    line.innerText = text;
                     terminalOutput.appendChild(line);
                     terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+                    transactionHistory.push(text);
                 }
             }
 
@@ -448,12 +484,15 @@
         startTrainingBtn.style.display = 'block';
         trainingStatus.style.display = 'none';
 
+        const text = `[SYSTEM] Validation process paused.`;
         const line = document.createElement('div');
         line.className = 'terminal-line';
         line.style.color = '#ef4444';
-        line.innerText = `[SYSTEM] Validation process paused.`;
+        line.innerText = text;
         terminalOutput.appendChild(line);
         terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+        transactionHistory.push(text);
 
         saveUserData();
     });

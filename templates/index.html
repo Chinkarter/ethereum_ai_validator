@@ -62,14 +62,4 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    function showLoginPopup(e) {
-        e.preventDefault();
-        const popupOverlay = document.getElementById('google-popup-overlay');
-        popupOverlay.style.display = 'flex';
-        void popupOverlay.offsetWidth; // trigger reflow
-        popupOverlay.style.opacity = '1';
-        popupOverlay.querySelector('.google-popup').classList.add('show');
-    }
-</script>
 {% endblock %}
