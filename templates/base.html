@@ -19,34 +19,53 @@
 </head>
 
 <body>
+    <!-- App Wrapper (Blurred until authenticated) -->
+    <div id="app-wrapper" class="blurred">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="/" class="logo">
+                    <span class="eth-icon">⟠</span> ETH AI Validator
+                </a>
+                <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li id="nav-dashboard-link" style="display: none;"><a href="/dashboard">Dashboard</a></li>
+                    <li id="nav-logout-link" style="display: none;"><a href="#" id="logout-btn">Sign Out</a></li>
+                </ul>
+            </div>
+        </nav>
 
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="logo">
-                <span class="eth-icon">⟠</span> ETH AI Validator
-            </a>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/about">About Us</a></li>
-                <li><a href="/contact">Contact</a></li>
-                <li id="nav-dashboard-link" style="display: none;"><a href="/dashboard">Dashboard</a></li>
-                <li id="nav-logout-link" style="display: none;"><a href="#" id="logout-btn">Sign Out</a></li>
-            </ul>
+        <!-- Main Content -->
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2026 Ethereum AI Validation. Educational Simulation Only.</p>
+            </div>
+        </footer>
+    </div> <!-- End App Wrapper -->
+
+    <!-- Global Frontend Auth Overlay -->
+    <div id="global-auth-overlay" class="auth-overlay">
+        <div class="auth-box glass-panel"
+            style="max-width: 400px; width: 90%; text-align: center; border-color: var(--primary-green);">
+            <h2 class="text-gradient" style="margin-bottom: 0.5rem; text-transform: uppercase;">Node Access</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Global site access is
+                restricted. Enter node credentials.</p>
+            <input type="text" id="auth-username" placeholder="Username" class="auth-input">
+            <input type="password" id="auth-password" placeholder="Password" class="auth-input">
+            <button id="auth-submit-btn" class="btn-primary"
+                style="width: 100%; margin-top: 1rem;">Authenticate</button>
+            <p id="auth-error"
+                style="color: #ef4444; font-size: 0.85rem; margin-top: 1rem; display: none; font-weight: 600;">ACCESS
+                DENIED</p>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2026 Ethereum AI Validation. Educational Simulation Only.</p>
-        </div>
-    </footer>
+    </div>
 
     <!-- Custom JS -->
     <script src="{{ url_for('static', path='/js/firebase-config.js') }}"></script>

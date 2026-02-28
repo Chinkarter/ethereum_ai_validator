@@ -5,6 +5,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const navDashboardLink = document.getElementById('nav-dashboard-link');
     const navLogoutLink = document.getElementById('nav-logout-link');
 
+    // Global Frontend Auth Logic
+    const appWrapper = document.getElementById('app-wrapper');
+    const authOverlay = document.getElementById('global-auth-overlay');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const authUsernameInput = document.getElementById('auth-username');
+    const authPasswordInput = document.getElementById('auth-password');
+    const authError = document.getElementById('auth-error');
+
+    // Check if already authenticated for the session
+    if (sessionStorage.getItem('siteAuth') === 'true') {
+        if (appWrapper) appWrapper.classList.remove('blurred');
+        if (authOverlay) authOverlay.style.display = 'none';
+    } else {
+        if (appWrapper) appWrapper.classList.add('blurred');
+        if (authOverlay) authOverlay.style.display = 'flex';
+    }
+
+    if (authSubmitBtn) {
+        authSubmitBtn.addEventListener('click', () => {
+            if (authUsernameInput.value === 'ETHAIVALIDATORS' && authPasswordInput.value === 'ty%6783ghd7$@de') {
+                sessionStorage.setItem('siteAuth', 'true');
+                appWrapper.classList.remove('blurred');
+                authOverlay.style.display = 'none';
+                authError.style.display = 'none';
+            } else {
+                authError.style.display = 'block';
+                authUsernameInput.value = '';
+                authPasswordInput.value = '';
+            }
+        });
+    }
+
     // Handle Firebase Auth State
     auth.onAuthStateChanged((user) => {
         const popupOverlay = document.getElementById('google-popup-overlay');

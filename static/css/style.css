@@ -365,3 +365,44 @@ footer {
 .animate-fade-in {
     animation: fadeIn 0.8s ease forwards;
 }
+
+/* Global Frontend Auth Overlay */
+.blurred {
+    filter: blur(12px);
+    pointer-events: none;
+    user-select: none;
+    transition: filter 0.5s ease;
+}
+
+.auth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgba(2, 6, 23, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid var(--primary-green);
+    background: rgba(0, 0, 0, 0.6);
+    color: #00ff00;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    background: rgba(0, 0, 0, 0.8);
+}
