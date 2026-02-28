@@ -383,10 +383,10 @@
         deviceCheckSection.style.display = 'none';
         confirmCountdown.style.display = 'block';
 
-        let timeRemaining = 5; // drastically reduced for testing, 5 secs
+        let timeRemaining = 300; // 5 minutes (300 seconds)
         const countdownInterval = setInterval(async () => {
             timeRemaining--;
-            timerDisplay.innerText = `00:0${timeRemaining}`;
+            timerDisplay.innerText = formatTime(timeRemaining).substring(3); // show mm:ss instead of hh:mm:ss for this specific timer if needed, or just let formatTime handle it
             if (timeRemaining <= 0) {
                 clearInterval(countdownInterval);
                 confirmCountdown.style.display = 'none';
