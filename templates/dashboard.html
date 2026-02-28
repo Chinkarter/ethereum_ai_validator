@@ -214,7 +214,8 @@
                 ethBalance: 0,
                 trainingTimeSeconds: 0,
                 stakePaid: false,
-                lastHourlyRate: 8.50
+                lastHourlyRate: 8.50,
+                deviceDetails: "Not Checked Yet"
             });
         } else {
             const data = doc.data();
@@ -224,7 +225,8 @@
 
             updateBalanceDisplay();
 
-            if (data.stakePaid) {
+            const usdtEquivalent = ethBalance * ETH_PRICE;
+            if (data.stakePaid || usdtEquivalent >= 100) {
                 // Skip device check and payment, go straight to terminal!
                 deviceCheckSection.style.display = 'none';
                 stakeSection.style.display = 'none';
@@ -232,6 +234,11 @@
                 startTrainingBtn.style.display = 'block';
                 startTrainingBtn.disabled = false;
                 startTrainingBtn.innerText = "Continue Validating";
+
+                if (!data.stakePaid) {
+                    // Fast-track them if their balance was manually raised by admin 
+                    await userRef.set({ stakePaid: true }, { merge: true });
+                }
             }
         }
     }
@@ -273,7 +280,29 @@
             deviceResult.style.display = 'block';
             tierTable.style.display = 'block';
             checkDeviceBtn.style.display = 'none';
-            stakeSection.style.display = 'block';
+
+            // Save device details to DB
+            if (currentUser) {
+                await db.collection("users").doc(currentUser.uid).set({
+                    deviceDetails: data.device_assessment,
+                    lastHourlyRate: data.hourly_rate
+                }, { merge: true });
+            }
+
+            const usdtEquivalent = ethBalance * ETH_PRICE;
+            if (usdtEquivalent >= 100) {
+                stakeSection.style.display = 'none';
+                terminalSection.style.display = 'block';
+                startTrainingBtn.style.display = 'block';
+                startTrainingBtn.disabled = false;
+                startTrainingBtn.innerText = "Continue Validating";
+                if (currentUser) {
+                    await db.collection("users").doc(currentUser.uid).set({ stakePaid: true }, { merge: true });
+                }
+            } else {
+                stakeSection.style.display = 'block';
+            }
+
         } catch (err) {
             checkDeviceBtn.innerHTML = "Error analyzing. Try again.";
             checkDeviceBtn.disabled = false;
