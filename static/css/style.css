@@ -136,6 +136,8 @@ body::after {
 .terminal-line {
     margin-bottom: 0.5rem;
     animation: typeLog 0.1s ease-out forwards;
+    word-break: break-all;
+    /* Force long hexadecimal strings to wrap and not break container bounds */
 }
 
 @keyframes typeLog {
