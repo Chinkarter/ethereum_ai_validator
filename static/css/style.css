@@ -461,24 +461,37 @@ footer {
         font-size: 1rem !important;
     }
 
+    /* Horizontal Overflow Preventers */
+    body {
+        overflow-x: hidden !important;
+        width: 100vw;
+    }
+
+    main {
+        padding: 2rem 1rem;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
     /* Terminal Layout Fix */
     .terminal-container {
         padding: 1rem;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .terminal-content {
         height: 250px;
+        word-wrap: break-word;
+        /* Force long hashes to wrap */
+        overflow-wrap: break-word;
     }
 
     .terminal-header {
         flex-direction: column;
         text-align: center;
         gap: 0.5rem;
-    }
-
-    /* Layout Overrides */
-    main {
-        padding: 2rem 1rem;
+        font-size: 0.9rem;
     }
 
     /* Balances Size */
