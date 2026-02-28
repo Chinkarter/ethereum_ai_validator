@@ -31,9 +31,9 @@
             <!-- Step 2: Pay Stake -->
             <div id="stake-section"
                 style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--glass-border); display: none;">
-                <h3 style="margin-bottom: 1rem;">Initialize Stake ($50)</h3>
+                <h3 style="margin-bottom: 1rem;">Initialize Stake ($100)</h3>
                 <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
-                    To begin training your allocated workloads on our network, a minimum $50 USDT equivalent stake must
+                    To begin training your allocated workloads on our network, a minimum $100 USDT equivalent stake must
                     be deposited to the Ethereum staking contract via Binance.
                 </p>
                 <!-- Opens Binance in new tab as requested -->
@@ -41,7 +41,7 @@
                     style="margin-bottom: 1rem; display: block; text-align: center;">Pay Stake via Binance</a>
 
                 <button id="confirm-payment-btn" class="btn-primary"
-                    style="width: 100%; background: linear-gradient(135deg, #f59e0b, #ea580c);">I have paid 50
+                    style="width: 100%; background: linear-gradient(135deg, #f59e0b, #ea580c);">I have paid 100
                     USDT</button>
                 <p style="color: #ef4444; font-size: 0.8rem; text-align: center; margin-top: 0.5rem; font-weight: 600;">
                     Warning: False claims of payment will lead to an immediate permanent ban.</p>
@@ -53,7 +53,18 @@
                 <h3 class="text-gradient" style="margin-bottom: 1rem;">Confirming on Blockchain...</h3>
                 <p style="color: var(--text-muted); margin-bottom: 1rem;">Estimated time until confirmation:</p>
                 <div id="countdown-timer"
-                    style="font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums;">10:00</div>
+                    style="font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums;">00:05</div>
+            </div>
+
+            <!-- Hacker Terminal Section -->
+            <div id="terminal-section" class="terminal-container" style="display: none;">
+                <div class="terminal-header">
+                    <span>ETH::AI_VALIDATOR_NODE</span>
+                    <span id="terminal-timer">TIME: 00:00:00</span>
+                </div>
+                <div id="terminal-output" class="terminal-content">
+                    <div class="terminal-line">System initialized. Awaiting training orders...</div>
+                </div>
             </div>
 
         </div>
@@ -71,11 +82,14 @@
                 <div style="margin-top: 0.5rem; font-size: 1.2rem; color: #f8fafc;" id="usdt-balance">≈ $0.00 USDT</div>
             </div>
 
-            <button id="start-training-btn" class="btn-primary" style="width: 100%; display: none;" disabled>Start
-                Training AI Models</button>
+            <button id="start-training-btn" class="btn-primary" style="width: 100%; display: none;" disabled>Continue
+                Validating</button>
+            <button id="stop-training-btn" class="btn-secondary"
+                style="width: 100%; display: none; margin-top: 1rem; border-color: #ef4444; color: #ef4444;">Stop
+                Validating</button>
             <div id="training-status"
                 style="margin-top: 1rem; text-align: center; font-size: 0.9rem; color: var(--primary-green); display: none;">
-                🟢 Training Active - Do not switch off device
+                🟢 Training Active - AI generating validations
             </div>
 
             <div
@@ -84,7 +98,7 @@
                 </p>
                 <p style="font-weight: 600;" id="next-withdrawal">-</p>
                 <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Withdrawals processed on
-                    1st & 15th of the month. Min $50 USDT stake must remain.</p>
+                    1st & 15th of the month. Min $100 USDT stake must remain.</p>
             </div>
         </div>
     </div>
@@ -128,10 +142,9 @@
 
 {% block scripts %}
 <script>
-    // Constants for simulation
-    const ETH_PRICE = 3500; // Simulated ETH price in USD
+    const ETH_PRICE = 3500;
 
-    // Elements
+    // UI Elements
     const checkDeviceBtn = document.getElementById('check-device-btn');
     const deviceResult = document.getElementById('device-result');
     const stakeSection = document.getElementById('stake-section');
@@ -139,56 +152,116 @@
     const confirmCountdown = document.getElementById('confirmation-countdown');
     const timerDisplay = document.getElementById('countdown-timer');
     const startTrainingBtn = document.getElementById('start-training-btn');
+    const stopTrainingBtn = document.getElementById('stop-training-btn');
     const trainingStatus = document.getElementById('training-status');
     const ethBalanceDisplay = document.getElementById('eth-balance');
     const usdtBalanceDisplay = document.getElementById('usdt-balance');
-    const nextWithdrawalDisplay = document.getElementById('next-withdrawal');
     const deviceCheckSection = document.getElementById('device-check-section');
     const tierTable = document.getElementById('tier-table-wrapper');
+    const terminalSection = document.getElementById('terminal-section');
+    const terminalOutput = document.getElementById('terminal-output');
+    const terminalTimerText = document.getElementById('terminal-timer');
 
-    let hourlyRateUSD = 0;
+    let currentUser = null;
     let ethBalance = 0;
-    let trainingInterval;
+    let trainingTimeSeconds = 0;
+    let hourlyRateUSD = 8.50; // default medium
+    let isTraining = false;
+    let mainLoopInterval;
+
+    // Format timer
+    function formatTime(sec) {
+        const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+        const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
 
     // Set Next Withdrawal Date
     function setNextWithdrawal() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        const d1 = new Date(year, month, 1);
-        const d15 = new Date(year, month, 15);
-        const nextMonth1 = new Date(year, month + 1, 1);
-
-        let nextD;
-        if (now < d1) nextD = d1;
-        else if (now < d15) nextD = d15;
-        else nextD = nextMonth1;
-
-        nextWithdrawalDisplay.innerText = nextD.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        document.getElementById('next-withdrawal').innerText = "1st & 15th of the month";
     }
     setNextWithdrawal();
 
-    // Step 1: Check Device
+    function updateBalanceDisplay() {
+        ethBalanceDisplay.innerText = ethBalance.toFixed(8);
+        const usdtEquivalent = ethBalance * ETH_PRICE;
+        usdtBalanceDisplay.innerText = `≈ $${usdtEquivalent.toFixed(2)} USDT`;
+        terminalTimerText.innerText = `TIME: ` + formatTime(trainingTimeSeconds);
+    }
+
+    // FIREBASE SYNC LOGIC
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.href = '/';
+            return;
+        }
+        currentUser = user;
+        loadUserData();
+    });
+
+    async function loadUserData() {
+        if (!db) {
+            console.error("Firestore DB not initialized!");
+            return;
+        }
+        const userRef = db.collection("users").doc(currentUser.uid);
+        const doc = await userRef.get();
+        if (!doc.exists) {
+            // New user initialization
+            await userRef.set({
+                email: currentUser.email,
+                ethBalance: 0,
+                trainingTimeSeconds: 0,
+                stakePaid: false,
+                lastHourlyRate: 8.50
+            });
+        } else {
+            const data = doc.data();
+            ethBalance = data.ethBalance || 0;
+            trainingTimeSeconds = data.trainingTimeSeconds || 0;
+            hourlyRateUSD = data.lastHourlyRate || 8.50;
+
+            updateBalanceDisplay();
+
+            if (data.stakePaid) {
+                // Skip device check and payment, go straight to terminal!
+                deviceCheckSection.style.display = 'none';
+                stakeSection.style.display = 'none';
+                terminalSection.style.display = 'block';
+                startTrainingBtn.style.display = 'block';
+                startTrainingBtn.disabled = false;
+                startTrainingBtn.innerText = "Continue Validating";
+            }
+        }
+    }
+
+    async function saveUserData() {
+        if (!currentUser) return;
+        const userRef = db.collection("users").doc(currentUser.uid);
+        await userRef.set({
+            ethBalance: ethBalance,
+            trainingTimeSeconds: trainingTimeSeconds,
+            lastHourlyRate: hourlyRateUSD
+        }, { merge: true });
+    }
+
+    // Simulated Device Check
     checkDeviceBtn.addEventListener('click', async () => {
         checkDeviceBtn.innerHTML = "Analyzing Device capabilities...";
         checkDeviceBtn.disabled = true;
-
-        // Gather device info via JS
         const deviceInfo = {
             userAgent: navigator.userAgent,
             cores: navigator.hardwareConcurrency || "Unknown",
             memory: navigator.deviceMemory || "Unknown"
         };
-
         try {
-            // Call our FastAPI backend which will call Gemini
             const response = await fetch('/api/detect-device', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(deviceInfo)
             });
             const data = await response.json();
-
             hourlyRateUSD = data.hourly_rate;
 
             deviceResult.innerHTML = `
@@ -196,77 +269,103 @@
                     <h4 style="color: var(--primary-green); margin-bottom: 0.5rem;">Device Detected!</h4>
                     <p style="font-size: 0.9rem; margin-bottom: 0.5rem;"><strong>Specs:</strong> ${data.device_assessment}</p>
                     <p style="font-size: 1.1rem; color: #f8fafc;"><strong>Allocated Rate:</strong> $${data.hourly_rate}/hour</p>
-                </div>
-            `;
+                </div>`;
             deviceResult.style.display = 'block';
             tierTable.style.display = 'block';
-
             checkDeviceBtn.style.display = 'none';
             stakeSection.style.display = 'block';
-
         } catch (err) {
             checkDeviceBtn.innerHTML = "Error analyzing. Try again.";
             checkDeviceBtn.disabled = false;
         }
     });
 
-    // Step 2: Confirm Payment & Countdown
+    // Confirm Payment
     confirmPaymentBtn.addEventListener('click', () => {
         stakeSection.style.display = 'none';
         deviceCheckSection.style.display = 'none';
         confirmCountdown.style.display = 'block';
 
-        // Add 50 USD stake to balance immediately for UX feedback
-        ethBalance = 50 / ETH_PRICE;
-        updateBalanceDisplay();
-
-        // 10 minute countdown simulation (accelerated for testing if needed, keeping 10m here)
-        let timeRemaining = 600; // 10 minutes in seconds
-
-        const countdownInterval = setInterval(() => {
+        let timeRemaining = 5; // drastically reduced for testing, 5 secs
+        const countdownInterval = setInterval(async () => {
             timeRemaining--;
-            const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
-            const s = (timeRemaining % 60).toString().padStart(2, '0');
-            timerDisplay.innerText = `${m}:${s}`;
-
+            timerDisplay.innerText = `00:0${timeRemaining}`;
             if (timeRemaining <= 0) {
                 clearInterval(countdownInterval);
-                finishPaymentConfirmation();
+                confirmCountdown.style.display = 'none';
+
+                // Add initial bonus balance and mark as paid
+                ethBalance += (100 / ETH_PRICE);
+                updateBalanceDisplay();
+                await db.collection("users").doc(currentUser.uid).set({
+                    stakePaid: true,
+                    ethBalance: ethBalance
+                }, { merge: true });
+
+                terminalSection.style.display = 'block';
+                startTrainingBtn.style.display = 'block';
+                startTrainingBtn.disabled = false;
+                startTrainingBtn.innerText = "Start Validating";
             }
         }, 1000);
     });
 
-    function finishPaymentConfirmation() {
-        confirmCountdown.style.display = 'none';
-        startTrainingBtn.style.display = 'block';
-        startTrainingBtn.disabled = false;
-        startTrainingBtn.classList.add('animate-fade-in');
+    // Training Logic Loop
+    async function appendLog() {
+        try {
+            const res = await fetch('/api/generate-validation-log');
+            const data = await res.json();
+
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerText = `[${formatTime(trainingTimeSeconds)}] ` + data.log;
+            terminalOutput.appendChild(line);
+
+            // auto scroll
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        } catch (e) { }
     }
 
-    // Update Display format
-    function updateBalanceDisplay() {
-        ethBalanceDisplay.innerText = ethBalance.toFixed(8);
-        const usdtEquivalent = ethBalance * ETH_PRICE;
-        usdtBalanceDisplay.innerText = `≈ $${usdtEquivalent.toFixed(2)} USDT`;
-    }
-
-    // Step 3: Start Training Ticker
     startTrainingBtn.addEventListener('click', () => {
         startTrainingBtn.style.display = 'none';
+        stopTrainingBtn.style.display = 'block';
         trainingStatus.style.display = 'block';
+        isTraining = true;
 
-        // Calculate rate per 4 seconds based on hourly rate
-        // hourlyRateUSD / 3600 = USD per second. * 4 = USD per 4 seconds.
-        const usdPerFourSeconds = (hourlyRateUSD / 3600) * 4;
-        const ethPerFourSeconds = usdPerFourSeconds / ETH_PRICE;
+        const usdPerSecond = (hourlyRateUSD / 3600);
+        const ethPerSecond = usdPerSecond / ETH_PRICE;
 
-        // Run ticker every 4 seconds
-        trainingInterval = setInterval(() => {
-            // Add a tiny bit of randomness to make it look realistic (±10%)
-            const multiplier = 0.9 + (Math.random() * 0.2);
-            ethBalance += (ethPerFourSeconds * multiplier);
+        // Visual Logs & Earnings Loop (every 2 seconds fetch a log)
+        mainLoopInterval = setInterval(() => {
+            trainingTimeSeconds += 1;
+            ethBalance += ethPerSecond;
             updateBalanceDisplay();
-        }, 4000);
+
+            if (trainingTimeSeconds % 3 === 0) {
+                appendLog();
+            }
+            if (trainingTimeSeconds % 10 === 0) {
+                saveUserData(); // backup every 10 seconds
+            }
+        }, 1000);
+    });
+
+    stopTrainingBtn.addEventListener('click', () => {
+        isTraining = false;
+        clearInterval(mainLoopInterval);
+
+        stopTrainingBtn.style.display = 'none';
+        startTrainingBtn.style.display = 'block';
+        trainingStatus.style.display = 'none';
+
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        line.style.color = '#ef4444';
+        line.innerText = `[SYSTEM] Validation process paused.`;
+        terminalOutput.appendChild(line);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+        saveUserData();
     });
 
 </script>

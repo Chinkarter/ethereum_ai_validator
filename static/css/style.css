@@ -1,6 +1,7 @@
 /* style.css */
 :root {
-    --bg-dark: #0f172a; /* Dark grayish blue */
+    --bg-dark: #0f172a;
+    /* Dark grayish blue */
     --bg-darker: #020617;
     --primary-blue: #3b82f6;
     --primary-green: #10b981;
@@ -23,16 +24,138 @@ body {
     color: var(--text-light);
     line-height: 1.6;
     overflow-x: hidden;
-    background-image: 
-        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.1), transparent 25%);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -2;
+    background-size: cover;
+    background-position: center;
+    animation: bgSlideshow 30s infinite alternate;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    /* Matrix-like pure CSS overlay */
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+        repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.05) 1px, transparent 1px, transparent 3px);
+    pointer-events: none;
+}
+
+@keyframes bgSlideshow {
+    0% {
+        background-image: url('../img/bg1.png');
+        transform: scale(1.0);
+    }
+
+    45% {
+        background-image: url('../img/bg1.png');
+        transform: scale(1.05);
+    }
+
+    50% {
+        background-image: url('../img/bg2.png');
+        transform: scale(1.0);
+    }
+
+    95% {
+        background-image: url('../img/bg2.png');
+        transform: scale(1.05);
+    }
+
+    100% {
+        background-image: url('../img/bg3.png');
+        transform: scale(1.0);
+    }
+}
+
+/* Hacker Terminal Styles */
+.terminal-container {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid #00ff00;
+    border-radius: 8px;
+    padding: 1.5rem;
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2), inset 0 0 10px rgba(0, 255, 0, 0.1);
+    position: relative;
+    margin-top: 2rem;
+}
+
+.terminal-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #00ff00;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    color: #00ff00;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.terminal-content {
+    height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    color: #00ff00;
+    font-size: 0.95rem;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+.terminal-line {
+    margin-bottom: 0.5rem;
+    animation: typeLog 0.1s ease-out forwards;
+}
+
+@keyframes typeLog {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Hacking Scrollbar */
+.terminal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-content::-webkit-scrollbar-track {
+    background: #000;
+    border-left: 1px solid #00ff00;
+}
+
+.terminal-content::-webkit-scrollbar-thumb {
+    background: #00ff00;
 }
 
 /* Typography */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-weight: 800;
     letter-spacing: -0.02em;
 }
@@ -159,7 +282,10 @@ main {
 /* Google Sign In Popup (Animated) */
 .google-popup-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(2, 6, 23, 0.8);
     backdrop-filter: blur(5px);
     z-index: 1000;
@@ -225,8 +351,15 @@ footer {
 
 /* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .animate-fade-in {

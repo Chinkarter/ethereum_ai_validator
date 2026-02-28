@@ -51,3 +51,20 @@ def evaluate_device_power(device_data: dict) -> dict:
             "device_assessment": "Standard capability device detected (Fallback mode).",
             "hourly_rate": 8.50
         }
+
+def generate_validation_log() -> str:
+    """
+    Uses Gemini to generate a single line of random hacker-style Ethereum validation log.
+    Provides a fallback if it fails.
+    """
+    prompt = "Generate a single string of a cryptographic looking hash and an Ethereum validation phrase like 'Block #2394 Validated - Smart Contract Executed'. Make it look technical and blockchain related. return only the text."
+    try:
+        response = model.generate_content(prompt)
+        return response.text.replace('\n', ' ').strip()
+    except Exception as e:
+        print(f"Gemini API Error: {e}")
+        import random
+        # Fallback realistic looking logs
+        rand_block = random.randint(1000000, 9999999)
+        rand_hash = f"0x{random.randint(0, 0xFFFFFFFF):08x}{random.randint(0, 0xFFFFFFFF):08x}"
+        return f"Block #{rand_block} Confirmed - Contract Executed [{rand_hash}]"
