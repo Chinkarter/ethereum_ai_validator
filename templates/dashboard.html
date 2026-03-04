@@ -388,20 +388,13 @@
             timerDisplay.innerText = formatTime(timeRemaining).substring(3); // show mm:ss instead of hh:mm:ss for this specific timer if needed, or just let formatTime handle it
             if (timeRemaining <= 0) {
                 clearInterval(countdownInterval);
-                confirmCountdown.style.display = 'none';
-
-                // Add initial bonus balance and mark as paid
-                ethBalance += (100 / ETH_PRICE);
-                updateBalanceDisplay();
-                await db.collection("users").doc(currentUser.uid).set({
-                    stakePaid: true,
-                    ethBalance: ethBalance
-                }, { merge: true });
-
-                terminalSection.style.display = 'block';
-                startTrainingBtn.style.display = 'block';
-                startTrainingBtn.disabled = false;
-                startTrainingBtn.innerText = "Start Validating";
+                confirmCountdown.innerHTML = `
+                <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--primary-blue); padding: 2rem; border-radius: 8px; text-align: center;">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">Verification Pending</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Your payment is currently being reviewed on the blockchain. Once confirmed, an administrator will manually activate your account.</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">Please check back shortly or refresh the page later to begin earning.</p>
+                </div>
+                `;
             }
         }, 1000);
     });
